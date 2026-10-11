@@ -1,0 +1,387 @@
+/* ---------- Variables : couleurs réutilisables partout ---------- */
+:root {
+  --vert: #0d6633;            /* moitié haute du fond (vert du drapeau) */
+  --rouge: #ce1a1a;           /* moitié basse du fond (rouge du drapeau) */
+  --or: #d9a521;              /* accent doré (traits, devise) */
+  --texte: #f5faf7;           /* blanc légèrement verdâtre */
+  --texte2: #c7dbd4;          /* texte secondaire plus discret */
+  --verre-fond: rgba(18, 40, 36, 0.62);   /* teal foncé translucide */
+  --verre-bord: rgba(5, 13, 13, 0.9);     /* contour sombre */
+  --rayon: 18px;              /* coins arrondis des cartes */
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+/* box-sizing : les marges ne agrandissent pas les éléments ; on retire le flash gris au toucher */
+
+html, body {
+  margin: 0;                  /* pas de marge autour de la page */
+  height: 100%;               /* la page prend toute la hauteur */
+  overflow: hidden;           /* pas de défilement de la page entière */
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; /* police du téléphone */
+  color: var(--texte);        /* couleur de texte par défaut */
+  background: linear-gradient(to bottom, var(--vert) 50%, var(--rouge) 50%); /* drapeau : vert en haut, rouge en bas */
+}
+
+/* ---------- Écrans (accueil, manifeste) ---------- */
+.ecran {
+  position: fixed; inset: 0;  /* couvre tout l'écran */
+  display: none;              /* caché par défaut */
+  flex-direction: column;     /* éléments empilés verticalement */
+  padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom); /* évite l'encoche iPhone */
+}
+.ecran.actif { display: flex; animation: apparition .28s ease; } /* l'écran actif s'affiche avec un fondu */
+@keyframes apparition { from { opacity: 0; } to { opacity: 1; } } /* fondu : de transparent à visible */
+
+/* ---------- Étoile du drapeau (centre de l'écran) ---------- */
+.etoile {
+  position: fixed; left: 50%; top: 50%;          /* placée au centre */
+  width: 90px; height: 90px;                     /* taille de l'étoile */
+  transform: translate(-50%, -50%);              /* centre exact */
+  background: #f5c71a;                           /* jaune étoile */
+  clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%); /* forme d'étoile à 5 branches */
+  pointer-events: none;                          /* l'étoile ne bloque pas les clics */
+}
+
+/* ---------- Effet verre réutilisable ---------- */
+.verre {
+  background: linear-gradient(to bottom, rgba(255,255,255,.16), rgba(255,255,255,0) 40%), var(--verre-fond); /* reflet en haut + teal */
+  border: 1.5px solid var(--verre-bord);         /* contour sombre */
+  border-radius: var(--rayon);                   /* coins arrondis */
+  box-shadow: 0 3px 8px rgba(0,0,0,.28);         /* ombre portée */
+  backdrop-filter: blur(6px);                    /* léger flou derrière (ignoré si non supporté) */
+  -webkit-backdrop-filter: blur(6px);            /* même chose pour Safari */
+}
+
+/* ---------- En-tête de l'accueil ---------- */
+.entete { position: relative; z-index: 2; padding: 10px 12px 4px; } /* au-dessus de l'étoile, sert de repère au bouton tête */
+.titre { display: flex; align-items: center; gap: 2px; margin: 4px 8px 8px; } /* IPO + signature alignés */
+.lettre { position: relative; display: inline-block; padding: 0 1px 6px; }    /* conteneur lettre + barre */
+.lettre b { font-size: 34px; }                                                /* grosse lettre en gras */
+.lettre i { position: absolute; left: 15%; right: 15%; bottom: 0; height: 2.5px; border-radius: 2px; } /* barre colorée sous la lettre */
+.signature { margin-left: 10px; color: #b8c2bf; font-size: 15px; }            /* "by Asca_" discret */
+.devise { height: 40px; overflow: hidden; position: relative; }               /* bandeau : cache ce qui dépasse */
+.devise span {
+  position: absolute; top: 50%; white-space: nowrap;   /* texte sur une seule ligne */
+  font-weight: 700; font-size: 18px; color: var(--or); /* doré et gras */
+  animation: defile 12s linear infinite;               /* défile en boucle */
+}
+@keyframes defile { from { left: 100%; transform: translateY(-50%); } to { left: -100%; transform: translateY(-50%); } } /* de droite à gauche */
+
+/* ---------- Bouton tête (haut droit) : ouvrira le menu Moi/Réglages ---------- */
+.tete-bouton {
+  position: absolute; top: 12px; right: 14px;    /* coin haut-droit de l'en-tête */
+  width: 46px; height: 46px; border-radius: 50%; /* rond */
+  display: flex; align-items: center; justify-content: center;
+  color: var(--texte);                           /* couleur du silhouette (currentColor dans le SVG) */
+  cursor: pointer; transition: transform .1s;
+}
+.tete-bouton:active { transform: scale(.88); }   /* rétrécit légèrement à l'appui, comme les autres boutons */
+
+/* ---------- Grille de tuiles ---------- */
+.grille {
+  position: relative; z-index: 2;                /* au-dessus de l'étoile */
+  flex: 1; overflow-y: auto;                     /* prend la place restante et défile */
+  display: grid; grid-template-columns: 1fr 1fr; /* 2 colonnes */
+  gap: 16px; padding: 12px 14px 30px;            /* espaces entre tuiles et autour */
+  grid-auto-rows: 30vh;                          /* hauteur de chaque tuile */
+  align-content: start;                          /* tuiles collées en haut */
+}
+.tuile {
+  position: relative; cursor: pointer;           /* curseur main sur ordinateur */
+  display: flex; flex-direction: column; align-items: center; justify-content: flex-end; /* contenu en bas, centré */
+  padding-bottom: 12%;                           /* espace sous le trait doré */
+  text-align: center; color: #fff;               /* texte blanc centré */
+  font-weight: 800; letter-spacing: .5px;        /* gras, lettres espacées */
+  text-shadow: 0 0 3px rgba(0,0,0,.6);           /* contour sombre du texte */
+  transition: transform .25s cubic-bezier(.34,1.56,.64,1), opacity .1s; /* rebond au relâchement */
+  opacity: 0; animation: entree .35s ease forwards; /* apparition en cascade */
+}
+@keyframes entree { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } } /* monte en apparaissant */
+.tuile:active { transform: scale(.85); opacity: .72; transition-duration: .03s; } /* rétrécit quand on appuie */
+.tuile img { position: absolute; top: 12%; left: 50%; transform: translateX(-50%); width: 62%; max-height: 42%; object-fit: contain; opacity: .82; } /* icône dorée en haut, centrée explicitement (l'align-items du parent ne suffit pas pour un élément en position absolue) */
+.tuile .nom { font-size: 17px; line-height: 1.1; z-index: 1; }   /* nom de la section */
+.tuile .nom small { display: block; font-size: 11px; font-weight: 700; } /* 2e ligne du Manifeste, plus petite */
+.tuile::after {
+  content: ""; position: absolute; left: 39%; right: 39%; bottom: 10%; /* petit trait doré centré */
+  height: 1.5px; background: var(--or); border-radius: 2px;
+}
+
+/* ---------- Écran Manifeste ---------- */
+.barre-haut { display: flex; align-items: center; gap: 10px; padding: 10px 12px; } /* ligne de boutons */
+.titre-page { flex: 1; text-align: center; font-weight: 700; font-size: 16px; text-shadow: 0 0 3px rgba(0,0,0,.6); } /* titre au centre */
+.btn-verre {
+  min-width: 46px; height: 46px; padding: 0 14px;      /* taille tactile confortable */
+  font-size: 20px; font-weight: 700; color: var(--texte); /* texte blanc */
+  background: var(--verre-fond); border: 1.5px solid var(--verre-bord); border-radius: 14px; /* style verre */
+  box-shadow: 0 0 0 1px rgba(217,165,33,.45);         /* fine aura dorée */
+  cursor: pointer; transition: transform .1s;         /* animation d'appui */
+}
+.btn-verre:active { transform: scale(.9); }           /* rétrécit à l'appui */
+.btn-verre.large { font-size: 15px; }                 /* boutons Précédent/Suivant plus petits en texte */
+.btn-verre:disabled { opacity: .35; }                 /* bouton grisé (première/dernière page) */
+.page-contenu { flex: 1; overflow-y: auto; margin: 0 12px; padding: 16px 16px 24px; -webkit-overflow-scrolling: touch; } /* zone de lecture défilante */
+.page-contenu h1 { color: #2fd16f; font-size: 21px; margin: 0 0 14px; }  /* titres verts (comme l'app) */
+.page-contenu h2 { color: #ff5a4a; font-size: 17px; margin: 18px 0 10px; } /* sous-titres rouges */
+.page-contenu p { font-size: 16px; line-height: 1.55; margin: 0 0 14px; } /* paragraphes lisibles */
+.page-contenu blockquote { margin: 0 0 14px; font-style: italic; }       /* citations en italique */
+.page-contenu blockquote cite { display: block; color: #ffd100; font-style: normal; margin-top: 4px; } /* auteur en jaune */
+.page-contenu ul { padding-left: 4px; list-style: none; margin: 0 0 14px; } /* listes sans puces natives */
+.page-contenu li { margin-bottom: 8px; line-height: 1.4; font-size: 15px; } /* espacement des lignes */
+.page-contenu li::before { content: "•  "; }                              /* puce personnalisée */
+.page-contenu a.ref { color: #ff5a4a; font-weight: 800; text-decoration: underline; cursor: pointer; } /* numéro de page cliquable */
+.page-contenu img { width: 100%; border-radius: 12px; }                   /* images pleine largeur */
+.image-absente { padding: 40px 10px; text-align: center; color: var(--texte2); } /* message si image manquante */
+.barre-bas { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 12px; } /* pied de page */
+#compteur { font-weight: 700; text-shadow: 0 0 3px rgba(0,0,0,.6); }      /* "3 / 52" */
+
+/* ---------- Écran Chants : liste des catégories ---------- */
+.espace-titre { width: 46px; }                         /* même largeur que le bouton retour, pour centrer le titre */
+.liste-categories { flex: 1; overflow-y: auto; padding: 12px 14px 30px; -webkit-overflow-scrolling: touch; } /* colonne défilante */
+.categorie {                                           /* une tuile de catégorie (ex : "Chants") */
+  margin-bottom: 14px; overflow: hidden;               /* cache les chants tant qu'elle est fermée */
+}
+.categorie-entete {                                    /* ligne cliquable qui ouvre/ferme la catégorie */
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 18px; cursor: pointer;                 /* toute la ligne est cliquable */
+}
+.categorie-entete .num {                                /* petit rond avec le numéro de catégorie */
+  width: 28px; height: 28px; border-radius: 50%; background: rgba(217,165,33,.85);
+  color: #16211c; font-weight: 800; font-size: 13px;
+  display: flex; align-items: center; justify-content: center; margin-right: 10px; flex-shrink: 0;
+}
+.categorie-entete .titre-cat { flex: 1; font-weight: 700; font-size: 16px; } /* nom de la catégorie */
+.categorie-entete .fleche { font-size: 14px; color: var(--or); transition: transform .2s; } /* chevron */
+.categorie.ouverte .fleche { transform: rotate(180deg); } /* chevron retourné quand ouverte */
+.liste-chants {                                        /* conteneur des chants d'une catégorie */
+  max-height: 0; transition: max-height .25s ease;     /* fermé par défaut, s'anime à l'ouverture */
+}
+.categorie.ouverte .liste-chants { max-height: 900px; } /* assez grand pour ne rien couper */
+.chant-ligne {                                          /* une ligne = un chant cliquable */
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 18px 12px 46px; font-size: 15px;
+  border-top: 1px solid rgba(255,255,255,.08); cursor: pointer;
+}
+.chant-ligne:active { background: rgba(255,255,255,.08); } /* léger retour visuel au toucher */
+.chant-ligne .puce { color: var(--or); }                /* petit tiret doré devant le nom */
+
+/* ---------- Écran Paroles ---------- */
+.paroles-texte { white-space: pre-line; font-size: 16px; line-height: 1.7; } /* respecte les sauts de ligne des paroles */
+.paroles-texte .rouge { color: #ff5a4a; font-weight: 700; } /* "Couplet"/"Refrain" en rouge, comme dans l'app */
+#btn-lecture:disabled { opacity: .35; }                  /* bouton lecture grisé sans audio pour l'instant */
+
+/* ---------- Message temporaire ---------- */
+.toast {
+  position: fixed; left: 50%; bottom: 40px; transform: translateX(-50%) translateY(20px); /* en bas, centré */
+  background: rgba(10,20,18,.92); padding: 12px 18px; border-radius: 12px; font-size: 14px; /* bulle sombre */
+  opacity: 0; pointer-events: none; transition: .25s; z-index: 9;                          /* invisible au départ */
+}
+.toast.visible { opacity: 1; transform: translateX(-50%); }               /* affichée quand on ajoute "visible" */
+
+/* ---------- Menu de la tête (Profil / Réglages) ---------- */
+.menu-tete { position: fixed; inset: 0; z-index: 50; display: none; align-items: center; justify-content: center; background: rgba(0,0,0,.55); } /* voile sombre plein écran */
+.menu-tete.ouvert { display: flex; animation: apparition .15s ease; }                   /* affiché avec un fondu */
+.menu-boutons { display: flex; gap: 18px; width: 85%; max-width: 420px; }               /* deux boutons côte à côte */
+.menu-rect { flex: 1; height: 22vh; min-height: 120px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; color: var(--texte); font-size: 17px; font-weight: 800; cursor: pointer; animation: pop .18s ease both; }
+.menu-rect + .menu-rect { animation-delay: .04s; }                                     /* le 2e arrive juste après */
+.menu-rect:active { transform: scale(.92); }
+@keyframes pop { from { opacity: 0; transform: scale(.85); } to { opacity: 1; transform: none; } }
+
+/* ---------- Fenêtre modale ---------- */
+.modale { position: fixed; inset: 0; z-index: 60; display: none; align-items: center; justify-content: center; padding: 18px; background: rgba(0,0,0,.6); }
+.modale.ouverte { display: flex; animation: apparition .15s ease; }
+.modale-boite { width: 100%; max-width: 420px; max-height: 80vh; overflow-y: auto; padding: 18px; background: #12282c; }
+.modale-boite h3 { margin: 0 0 6px; text-align: center; font-size: 19px; }
+.modale-boite .liseret { width: 84px; height: 4px; margin: 0 auto 14px; border-radius: 2px; background: linear-gradient(to right, #da291c 33%, #ffd100 33% 66%, #009b3a 66%); } /* trait tricolore */
+.modale-boite p, .modale-boite .faq { font-size: 15px; line-height: 1.5; color: var(--texte); white-space: pre-line; margin: 0 0 12px; }
+.modale-boite .centre { text-align: center; }
+.modale-boite .version { text-align: center; color: var(--or); font-weight: 800; margin-bottom: 8px; }
+.modale-boite input[type=text] { width: 100%; height: 46px; padding: 0 14px; font-size: 16px; color: var(--texte); background: rgba(255,255,255,.08); border: 1.5px solid var(--or); border-radius: 12px; outline: none; margin-bottom: 14px; }
+.modale-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.modale-actions .btn-verre { flex: 1; font-size: 15px; }
+.btn-danger { background: rgba(206,26,26,.75); }
+
+/* ---------- Profil ---------- */
+.profil-zone { background: rgba(7,20,18,.86); border-radius: var(--rayon); }
+.profil-haut { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
+.avatar-bloc { flex: none; text-align: center; }
+.avatar { width: 82px; height: 82px; border-radius: 50%; border: 3px solid var(--or); overflow: hidden; display: flex; align-items: center; justify-content: center; background: #12282c; color: var(--texte2); } /* anneau doré */
+.avatar img { width: 100%; height: 100%; object-fit: cover; margin: 0; border-radius: 0; }
+.avatar-actions { display: flex; gap: 8px; justify-content: center; margin-top: 8px; }
+.avatar-actions .btn-verre { min-width: 38px; height: 38px; padding: 0; font-size: 16px; }
+.carte-id { flex: 1; min-width: 0; padding: 10px 14px; background: rgba(18,41,36,.95); border: 1px solid rgba(255,255,255,.12); border-radius: 15px; cursor: pointer; }
+.carte-id small { display: block; color: #8cd9f2; font-weight: 800; font-size: 10px; }
+.carte-id b { display: block; font-size: 20px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.duo { display: flex; gap: 12px; margin-bottom: 14px; }
+.carte-info { flex: 1; padding: 10px 12px; background: rgba(18,41,36,.95); border: 1px solid rgba(255,255,255,.12); border-radius: 15px; cursor: pointer; }
+.carte-info small { display: block; color: var(--texte2); font-size: 11px; font-weight: 700; }
+.carte-info b { font-size: 18px; }
+.bloc-lignes { padding: 6px 10px; margin-bottom: 14px; background: rgba(14,33,29,.94); border-radius: 18px; }
+.ligne-info { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 4px; cursor: pointer; }
+.ligne-info + .ligne-info { border-top: 1px solid rgba(255,255,255,.07); }
+.ligne-info span { color: #bfd6d3; font-weight: 800; font-size: 14px; }
+.badge { max-width: 50%; padding: 6px 12px; background: #2e403b; border-radius: 12px; font-weight: 800; font-size: 12px; text-align: center; overflow: hidden; text-overflow: ellipsis; }
+.phrases { display: flex; gap: 8px; margin-bottom: 16px; }
+.phrase { flex: 1; min-height: 70px; padding: 8px; display: flex; align-items: center; justify-content: center; text-align: center; font-weight: 800; font-size: 13px; color: var(--or); background: rgba(14,33,29,.94); border: 1px solid rgba(217,165,33,.45); border-radius: 15px; cursor: pointer; }
+.profil-zone .btn-verre.large { width: 100%; }
+
+/* ---------- Réglages ---------- */
+.reglages-zone { padding: 6px 14px; }
+.ligne-reglage { display: flex; align-items: center; justify-content: space-between; min-height: 54px; padding: 8px 2px; font-size: 16px; font-weight: 700; cursor: pointer; }
+.ligne-reglage + .ligne-reglage { border-top: 1px solid rgba(255,255,255,.08); }
+.ligne-reglage:active { opacity: .6; }
+.ligne-reglage .valeur { color: var(--or); font-weight: 800; }
+.interrupteur { position: relative; flex: none; width: 50px; height: 28px; border-radius: 14px; background: #55605d; transition: background .18s; }
+.interrupteur::after { content: ""; position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; background: #fff; transition: transform .18s; } /* le rond glisse */
+.interrupteur.actif { background: #1fa855; }
+.interrupteur.actif::after { transform: translateX(22px); }
+
+/* ---------- Texte agrandi (réglage) ---------- */
+body.texte-grand .page-contenu p, body.texte-grand .page-contenu li { font-size: 19px; }
+body.texte-grand .paroles-texte { font-size: 20px; }
+body.texte-grand .ligne-reglage, body.texte-grand .modale-boite p { font-size: 18px; }
+.profil-zone, .reglages-zone { flex: 0 1 auto; }   /* le cadre épouse son contenu au lieu de remplir tout l écran */
+
+/* ---------- Icônes dorées (comme dans l'application) ---------- */
+.tete-img { height: 62%; width: auto; object-fit: contain; }                          /* silhouette dorée de la tête */
+.menu-icone { width: 42%; max-width: 90px; aspect-ratio: 1; object-fit: contain; }    /* icônes du menu : 42 % du bouton */
+.menu-icone.rond { border-radius: 50%; }                                              /* l'avatar est rond */
+.avatar img.defaut { width: 100%; height: 100%; object-fit: cover; }                  /* avatar IPO par défaut */
+.menu-rect, .tete-bouton { box-shadow: 0 3px 8px rgba(0,0,0,.28), 0 0 0 1px rgba(217,165,33,.5); } /* fine aura dorée comme dans l'appli */
+
+/* ---------- Écran Cours : modules et chapitres ---------- */
+.titre-modules { font-size: 22px; font-weight: 800; letter-spacing: .5px; }            /* « MODULES IPO » */
+.liseret-page { width: 84px; height: 4px; margin: -2px auto 6px; border-radius: 2px; background: linear-gradient(to right, #da291c 33%, #ffd100 33% 66%, #009b3a 66%); } /* trait tricolore sous le titre */
+.module { margin-bottom: 12px; overflow: hidden; border: 1.5px solid var(--verre-bord); transition: border-color .2s, transform .22s cubic-bezier(.34,1.56,.64,1); } /* tuile de module */
+.module:active { transform: scale(.97); }                                               /* petit rebond à l'appui */
+.module.ouvert { border-color: #f5c71a; }                                               /* contour doré quand ouvert */
+.module-entete { min-height: 145px; padding: 20px 42px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 6px; cursor: pointer; font-weight: 800; font-size: 17px; line-height: 1.3; }
+.module-entete .mod-num { letter-spacing: 1px; }                                        /* « MODULE 01 » */
+.module-entete .mod-fleche { color: var(--or); font-size: 15px; transition: transform .25s; } /* chevron doré */
+.module.ouvert .mod-fleche { transform: rotate(180deg); }                               /* chevron retourné */
+.module-chapitres { max-height: 0; opacity: 0; overflow: hidden; transition: max-height .3s cubic-bezier(.215,.61,.355,1), opacity .3s; } /* fermé par défaut */
+.module.ouvert .module-chapitres { max-height: 1600px; opacity: 1; }                    /* ouvert : tout visible */
+.chapitres-fil { position: relative; display: flex; flex-direction: column; gap: 7px; padding: 8px 10px 10px 34px; } /* colonne des chapitres */
+.chapitres-fil::before { content: ""; position: absolute; left: 16px; top: 0; bottom: 41px; width: 2px; background: #d9a521; border-radius: 2px; } /* tronc doré du fil */
+.chapitre { position: relative; min-height: 66px; padding: 10px 16px; display: flex; flex-direction: column; justify-content: center; gap: 3px; font-size: 13px; line-height: 1.35; color: var(--texte); text-align: left; background: rgba(14,38,33,.96); border: 1px solid rgba(255,255,255,.10); border-radius: 14px; box-shadow: 0 2px 4px rgba(0,0,0,.22); cursor: pointer; transition: transform .22s cubic-bezier(.34,1.56,.64,1); }
+.chapitre:active { transform: scale(.96); }
+.chapitre b { font-size: 12px; letter-spacing: .5px; }                                   /* « CHAPITRE 01 » */
+.chapitre::before { content: ""; position: absolute; left: -18px; top: 50%; width: 18px; height: 2px; background: #d9a521; } /* branche vers le tronc */
+.chapitre::after { content: ""; position: absolute; left: -3px; top: calc(50% - 3px); width: 7px; height: 7px; border-radius: 50%; background: #d9a521; } /* point doré */
+
+/* ---------- Fenêtre d'un chapitre (glisse depuis le bas) ---------- */
+.feuille { position: fixed; inset: 0; z-index: 55; display: flex; align-items: flex-end; background: rgba(0,0,0,0); visibility: hidden; transition: background .22s, visibility 0s .28s; }
+.feuille.ouverte { background: rgba(0,0,0,.6); visibility: visible; transition: background .22s, visibility 0s; }
+.feuille-panneau { width: 100%; height: 100%; padding: max(14px, env(safe-area-inset-top)) 14px max(14px, env(safe-area-inset-bottom)); display: flex; flex-direction: column; gap: 8px; border-radius: 0; background: #12282c; transform: translateY(100%); transition: transform .28s cubic-bezier(.215,.61,.355,1); }
+.feuille.ouverte .feuille-panneau { transform: none; }
+.feuille-module { text-align: center; font-size: 12px; letter-spacing: .5px; color: var(--texte2); }
+.feuille-titre { text-align: center; font-size: 17px; font-weight: 800; }
+.feuille-texte { flex: 1; overflow-y: auto; padding: 14px 6px; font-size: 16px; line-height: 1.6; white-space: pre-line; -webkit-overflow-scrolling: touch; }
+.feuille-texte.vide { color: var(--texte2); text-align: center; padding-top: 40px; }     /* message « pas encore rédigé » */
+body.texte-grand .feuille-texte { font-size: 20px; }
+
+/* ---------- Pages plein écran : À propos et Contribuer ---------- */
+.plein { position: fixed; inset: 0; z-index: 55; display: flex; justify-content: center; background: #122420; padding: max(34px, env(safe-area-inset-top)) 0 max(18px, env(safe-area-inset-bottom)); opacity: 0; visibility: hidden; transition: opacity .16s ease, visibility 0s .16s; } /* fond uni, caché */
+.plein.ouvert { opacity: 1; visibility: visible; transition: opacity .14s ease; }        /* apparition en fondu */
+.plein-col { width: 90%; max-width: 520px; height: 100%; display: flex; flex-direction: column; gap: 10px; }
+.plein-titre { text-align: center; font-size: 30px; font-weight: 800; margin: 0; }        /* « IPO » / « Contribuer » */
+.plein-titre.moyen { font-size: 26px; }
+.plein .liseret { width: 84px; height: 4px; margin: 0 auto 4px; border-radius: 2px; background: linear-gradient(to right, #da291c 33%, #ffd100 33% 66%, #009b3a 66%); flex: none; }
+.plein-version { text-align: center; color: #d9a621; font-weight: 800; font-size: 14px; }
+.plein-texte { flex: 1; overflow-y: auto; text-align: center; font-size: 15px; line-height: 1.5; color: #e6f0ed; white-space: pre-line; -webkit-overflow-scrolling: touch; }
+.plein-texte .accent { color: #f04638; font-weight: 800; }                               /* rouge des titres (comme dans l'appli) */
+.plein-texte a { color: inherit; text-decoration: underline; }
+.plein-intro { text-align: center; font-size: 14px; color: #e6f0ed; }
+.contrib-bloc { margin-bottom: 14px; font-size: 14px; line-height: 1.45; }
+.contrib-bloc b { display: block; color: #f04638; }                                     /* titre rouge de chaque forme d'aide */
+.plein-note { text-align: center; font-size: 12px; color: var(--texte2); }
+.plein-reseaux { display: flex; gap: 10px; }
+.plein-reseaux .btn-verre { flex: 1; height: 56px; }
+.plein-col > .btn-verre { min-height: 38px; font-size: 13px; }
+.plein-fermer { align-self: center; width: 50%; }
+body.texte-grand .plein-texte, body.texte-grand .contrib-bloc { font-size: 18px; }
+
+/* ---------- Arbre de galons : plan zoomable (schéma dessiné ou image) ---------- */
+.plan-zone { flex: 1; position: relative; overflow: hidden; margin: 6px 8px 0; border-radius: 14px; touch-action: none; user-select: none; -webkit-user-select: none; background: rgba(7,10,10,.35); transition: opacity .15s ease; }
+.plan-zone.bascule { opacity: 0; }
+.plan-contenu { position: absolute; left: 0; top: 0; transform-origin: 0 0; will-change: transform; }
+.plan-contenu[hidden] { display: none; }
+#plan-interactif { width: 1800px; height: 1180px; border-radius: 16px; background: rgba(18,26,26,.55); } /* fond du plan */
+#plan-image { max-width: none; pointer-events: none; }
+.gal-traits { position: absolute; left: 0; top: 0; pointer-events: none; }
+.gal-traits line { stroke: rgba(191,199,194,.85); stroke-width: 1.6; }
+.boite-galon { position: absolute; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 5px; color: #fff; background: rgba(41,41,46,.92); border: 1.3px solid rgba(217,166,33,.85); border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,.35); cursor: pointer; }
+.boite-galon.sommet { background: #1a386b; }
+.boite-galon.officiers_generaux { background: rgba(38,77,51,.92); }
+.gal-nom { font-size: 13.5px; font-weight: 700; line-height: 1.25; white-space: pre-line; }
+.gal-pastilles, .gal-barres { position: absolute; left: 0; right: 0; top: 6px; display: flex; flex-direction: column; align-items: center; pointer-events: none; }
+.gal-pastilles { flex-direction: row; justify-content: center; gap: 4px; }
+.gal-pastilles i { width: 9px; height: 9px; border-radius: 50%; background: var(--or); }
+.gal-barres i { width: 55%; height: 3px; margin-bottom: 2px; background: var(--or); }
+.barre-galon { position: absolute; box-sizing: border-box; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; font-weight: 700; background: rgba(28,56,38,.95); border-radius: 8px; pointer-events: none; }
+.gal-legende { position: absolute; box-sizing: border-box; text-align: center; font-size: 15px; line-height: 1.35; color: var(--texte2); white-space: pre-line; pointer-events: none; }
+.gal-legende b { color: var(--texte); }
+.gal-actions { display: flex; gap: 10px; padding: 8px 12px calc(10px + env(safe-area-inset-bottom, 0px)); }
+.gal-actions .btn-verre { flex: 1; width: auto; height: 42px; border-radius: 14px; font-weight: 800; }
+
+/* ---------- Onboarding (questions à la première ouverture) ---------- */
+.onb-fond {
+  /* Le visuel (triangle + voile) est porté par #onb-fond-visuel plus bas, pas ici :
+     ça laisse l'étoile fixe (déclarée avant les écrans dans le HTML) rester visible
+     par-dessus, comme dans l'app Android. */
+  justify-content: center; align-items: center; padding: 24px; /* recentre la carte de question */
+}
+
+/* Triangle rouge (tout le bord du haut, resserré jusqu'à 40% de la hauteur sur le bord
+   gauche -- même polygone que creer_texture_fond_onboarding côté Python) + voile sombre
+   au CENTRE (pas sur les bords). Cachée hors onboarding, affichée via body.onb-actif. */
+.onb-fond-visuel { display: none; position: fixed; inset: 0; z-index: 0; background: var(--vert); }
+body.onb-actif .onb-fond-visuel { display: block; }
+.onb-fond-visuel::before {
+  content: ''; position: absolute; inset: 0; background: var(--rouge);
+  clip-path: polygon(0 0, 100% 0, 0 40%);
+}
+.onb-fond-visuel::after {
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(60% 45% at 50% 42%, rgba(5,12,10,.82) 0%, rgba(5,12,10,0) 100%);
+}
+body.onb-actif .etoile {
+  top: 20%;                                                  /* remonte l'étoile comme dans l'onboarding original */
+  animation: onb-pulse 1.5s ease-in-out infinite alternate;  /* pulsation douce */
+}
+@keyframes onb-pulse { from { transform: translate(-50%, -50%) scale(.85); } to { transform: translate(-50%, -50%) scale(1.05); } }
+
+.onb-etape { width: 100%; max-width: 360px; display: flex; flex-direction: column; gap: 14px; }
+.onb-entree { animation: onb-entree .4s cubic-bezier(.34,1.1,.64,1); } /* rejouée à chaque étape via JS (remove puis add de cette classe) */
+@keyframes onb-entree { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+.onb-question { text-align: center; font-size: 18px; font-weight: 700; line-height: 1.4; white-space: pre-line; padding: 22px 18px; } /* carte "verre" via .verre en plus de cette classe */
+.onb-champ { width: 100%; min-height: 52px; padding: 0 16px; border-radius: 14px; border: 1.5px solid var(--verre-bord); background: rgba(0,0,0,.28); color: var(--texte); font-size: 16px; text-align: center; } /* saisie nom/centre */
+.onb-champ::placeholder { color: rgba(245,250,247,.5); }
+.onb-boutons { display: flex; flex-direction: column; gap: 10px; }
+.onb-bouton { min-height: 52px; border-radius: 14px; font-size: 15px; font-weight: 800; letter-spacing: .5px; cursor: pointer; transition: transform .12s; color: var(--texte); font-family: inherit; } /* AFFIRMATIF/NÉGATIF/valider */
+.onb-bouton:active { transform: scale(.96); }
+.onb-bouton.secondaire { background: transparent; border: none; color: var(--texte2); font-weight: 600; min-height: 40px; } /* ‹ retour / modifier */
+.onb-secousse { animation: onb-secoue .32s; } /* petite secousse si on répond NÉGATIF à l'engagement */
+@keyframes onb-secoue { 20%{transform:translateX(-8px)} 40%{transform:translateX(8px)} 60%{transform:translateX(-5px)} 80%{transform:translateX(5px)} 100%{transform:translateX(0)} }
+
+/* ---------- Barre de progression (page du chant) ---------- */
+.barre-progression { display: flex; align-items: center; gap: 8px; padding: 10px 14px 4px; }
+.barre-progression .temps { font-size: 11px; color: var(--texte2); font-variant-numeric: tabular-nums; flex: none; width: 34px; }
+.barre-progression .temps:last-child { text-align: right; }
+#curseur-audio { flex: 1; height: 28px; accent-color: var(--or); background: transparent; }
+
+/* ---------- Mini-lecteur : reste affiché sur tous les écrans tant qu'un chant est chargé ---------- */
+.mini-lecteur {
+  position: fixed; left: 10px; right: 10px; bottom: calc(10px + env(safe-area-inset-bottom, 0px)); z-index: 5;
+  display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 16px;
+}
+.mini-lecteur[hidden] { display: none; }
+.mini-lecteur .btn-verre { flex: none; width: 38px; height: 38px; min-height: 0; font-size: 15px; }
+.mini-infos { flex: 1; min-width: 0; font-size: 13px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; }
+.mini-progression { position: absolute; left: 10px; right: 10px; bottom: 2px; height: 3px; background: rgba(255,255,255,.14); border-radius: 2px; overflow: hidden; }
+.mini-progression-remplie { height: 100%; width: 0%; background: var(--or); }
+
+/* ---------- Choix de langue du chant (Le Ditanyè) ---------- */
+.choix-langue { display: flex; gap: 8px; padding: 0 14px 10px; overflow-x: auto; }
+.choix-langue[hidden] { display: none; }
+.puce-langue { flex: none; height: 34px; padding: 0 16px; font-size: 14px; font-weight: 700; color: var(--texte); background: rgba(255,255,255,.08); border: 1.5px solid rgba(217,165,33,.45); border-radius: 17px; }
+.puce-langue.active { color: #1a1a1a; background: var(--or); border-color: var(--or); }

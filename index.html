@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<!-- Indique au navigateur que c'est une page HTML5 -->
+<html lang="fr">
+<!-- Racine de la page, langue française -->
+<head>
+<!-- Zone d'informations sur la page (invisible) -->
+  <meta charset="utf-8">
+  <!-- Permet d'afficher les accents correctement -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <!-- Adapte la page à la largeur du téléphone et utilise tout l'écran (encoche iPhone) -->
+  <title>IPO</title>
+  <!-- Titre de l'onglet -->
+  <link rel="manifest" href="manifest.webmanifest">
+  <!-- Fichier qui décrit l'app (nom, couleurs, icône) pour l'installer -->
+  <link rel="icon" href="icones/icone-192.png" type="image/png">
+  <!-- Icône de l'onglet, des onglets récents et du sélecteur d'apps (tant que l'app n'est pas installée) -->
+  <meta name="theme-color" content="#0d6633">
+  <!-- Couleur de la barre du navigateur (Android) -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <!-- iPhone : ouvre en plein écran quand ajoutée à l'écran d'accueil -->
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <!-- iPhone : barre d'état transparente au-dessus de l'app -->
+  <meta name="apple-mobile-web-app-title" content="IPO">
+  <!-- iPhone : nom sous l'icône -->
+  <link rel="apple-touch-icon" href="icones/icone-180.png">
+  <!-- iPhone : icône de l'app sur l'écran d'accueil -->
+  <link rel="stylesheet" href="style.css">
+  <!-- Charge le fichier de style (couleurs, tuiles, animations) -->
+</head>
+<!-- Fin de l'en-tête -->
+<body>
+<!-- Tout ce qui est visible commence ici -->
+
+  <div class="onb-fond-visuel" aria-hidden="true"></div>
+  <!-- Fond de l'onboarding (triangle rouge + voile sombre) : élément à part, affiché
+       seulement pendant l'onboarding (voir body.onb-actif en CSS), placé avant l'étoile
+       et les écrans dans le HTML pour rester dessous à l'affichage. -->
+  <div class="etoile"></div>
+  <!-- L'étoile jaune du drapeau : hors des écrans (qui passent en display:none),
+       donc reste visible sur tous les écrans et pas seulement l'accueil -->
+
+  <!-- ========== ÉCRAN 0 : ONBOARDING (questions à la toute première ouverture) ========== -->
+  <section id="onboarding" class="ecran onb-fond">
+  <!-- Devient "actif" au démarrage si aucun profil n'est enregistré (voir app.js) -->
+    <div class="onb-etape" id="onb-etape"></div>
+    <!-- Rempli par app.js : une question à la fois, comme dans l'app Android -->
+  </section>
+
+  <!-- ========== ÉCRAN 1 : ACCUEIL ========== -->
+  <section id="accueil" class="ecran">
+  <!-- Un écran = une section ; "actif" signifie qu'il est affiché -->
+    <header class="entete">
+    <!-- Barre du haut -->
+      <div class="titre">
+      <!-- Bloc du titre IPO -->
+        <span class="lettre"><b>I</b><i style="background:#da291c"></i></span>
+        <!-- Lettre I avec sa barre rouge dessous -->
+        <span class="lettre"><b>P</b><i style="background:#ffd100"></i></span>
+        <!-- Lettre P avec sa barre jaune -->
+        <span class="lettre"><b>O</b><i style="background:#009b3a"></i></span>
+        <!-- Lettre O avec sa barre verte -->
+        <small class="signature">by Asca_</small>
+        <!-- Ta signature à côté du titre -->
+      </div>
+      <div class="devise verre"><span id="devise">POUR MA PATRIE JE M'ENGAGE</span></div>
+      <!-- Bandeau en verre avec la devise qui défile -->
+      <button class="tete-bouton verre" id="btn-tete" aria-label="Menu">
+      <!-- Rond cliquable en haut à droite : ouvrira plus tard le menu Moi/Réglages -->
+        <img src="icones/silhouette.png" alt="" class="tete-img">
+      </button>
+    </header>
+
+    <main class="grille" id="grille"></main>
+    <!-- La grille des 8 tuiles : remplie par le fichier app.js -->
+  </section>
+
+  <!-- ========== ÉCRAN 2 : MANIFESTE ========== -->
+  <section id="manifeste" class="ecran">
+  <!-- Cet écran est caché tant qu'on n'ouvre pas le Manifeste -->
+    <div class="barre-haut">
+    <!-- Barre avec les boutons du haut -->
+      <button class="btn-verre" id="btn-retour" aria-label="Retour">←</button>
+      <!-- Bouton pour revenir à l'accueil -->
+      <div class="titre-page" id="titre-page">Manifeste</div>
+      <!-- Affiche le nom de la page en cours -->
+      <button class="btn-verre" id="btn-sommaire" aria-label="Sommaire">☰</button>
+      <!-- Bouton pour aller à la table des matières -->
+    </div>
+    <div class="page-contenu verre" id="page-contenu"></div>
+    <!-- Zone où le texte de la page est affiché (défile) -->
+    <div class="barre-bas">
+    <!-- Barre avec Précédent / numéro / Suivant -->
+      <button class="btn-verre large" id="btn-prec">Précédent</button>
+      <!-- Page d'avant -->
+      <span id="compteur">1 / 52</span>
+      <!-- Position actuelle -->
+      <button class="btn-verre large" id="btn-suiv">Suivant</button>
+      <!-- Page d'après -->
+    </div>
+  </section>
+
+  <!-- ========== ÉCRAN 3 : CHANTS (liste des catégories) ========== -->
+  <section id="chants" class="ecran">
+  <!-- Caché tant qu'on n'ouvre pas Chants depuis l'accueil -->
+    <div class="barre-haut">
+      <button class="btn-verre" id="btn-retour-chants" aria-label="Retour">←</button>
+      <!-- Retour à l'accueil -->
+      <div class="titre-page">CHANTS</div>
+      <!-- Titre fixe de l'écran -->
+      <span class="espace-titre"></span>
+      <!-- Espace vide pour équilibrer avec le bouton de gauche -->
+    </div>
+    <div class="liste-categories" id="liste-categories"></div>
+    <!-- Rempli par app.js : une tuile dépliable par catégorie -->
+  </section>
+
+  <!-- ========== ÉCRAN 4 : PAROLES D'UN CHANT ========== -->
+  <section id="paroles" class="ecran">
+  <!-- Affiche les paroles d'un chant précis -->
+    <div class="barre-haut">
+      <button class="btn-verre" id="btn-retour-paroles" aria-label="Retour">←</button>
+      <!-- Retour à la liste des chants -->
+      <div class="titre-page" id="titre-chant">Titre du chant</div>
+      <!-- Nom du chant -->
+      <button class="btn-verre" id="btn-lecture" aria-label="Écouter" disabled>▶</button>
+      <!-- Bouton lecture/pause : app.js l'active automatiquement si le fichier audio du chant existe -->
+    </div>
+    <div class="choix-langue" id="choix-langue" hidden></div>
+    <!-- Puces de langue (Le Ditanyè : Français, Mooré, Dioula, Fulfulde) : remplies par app.js -->
+    <div class="page-contenu verre paroles-texte" id="paroles-texte"></div>
+    <!-- Texte des paroles, avec "Couplet"/"Refrain" en rouge -->
+    <div class="barre-progression" id="barre-progression" hidden>
+      <span class="temps" id="temps-actuel">0:00</span>
+      <input type="range" id="curseur-audio" min="0" max="100" value="0" step="0.1" aria-label="Avancer ou reculer dans le chant">
+      <span class="temps" id="temps-total">0:00</span>
+    </div>
+  </section>
+
+  <!-- ========== MINI-LECTEUR : reste visible sur tous les écrans tant qu'un chant est ouvert ========== -->
+  <div class="mini-lecteur verre" id="mini-lecteur" hidden>
+    <button class="btn-verre" id="mini-lecture" aria-label="Lecture/Pause">▶</button>
+    <div class="mini-infos" id="mini-titre-chant">Titre du chant</div>
+    <div class="mini-progression"><div class="mini-progression-remplie" id="mini-barre-remplie"></div></div>
+    <button class="btn-verre" id="mini-fermer" aria-label="Arrêter la lecture">✕</button>
+  </div>
+
+  <!-- ========== ÉCRAN COURS : les modules ========== -->
+  <section id="cours" class="ecran">
+  <!-- Caché tant qu'on n'ouvre pas Cours depuis l'accueil -->
+    <div class="barre-haut">
+      <button class="btn-verre" id="btn-retour-cours" aria-label="Retour">←</button>
+      <div class="titre-page titre-modules">MODULES IPO</div>
+      <span class="espace-titre"></span>
+    </div>
+    <div class="liseret liseret-page"></div>
+    <div class="liste-categories" id="liste-modules"></div>
+    <!-- Rempli par app.js : une tuile dépliable par module -->
+  </section>
+
+  <!-- ========== ÉCRAN ORDRE SERRÉ (même présentation que Cours : modules/chapitres) ========== -->
+  <section id="ordre" class="ecran">
+    <div class="barre-haut">
+      <button class="btn-verre" id="btn-retour-ordre" aria-label="Retour">←</button>
+      <div class="titre-page titre-modules">ORDRE SERRÉ</div>
+      <span class="espace-titre"></span>
+    </div>
+    <div class="liseret liseret-page"></div>
+    <div class="liste-categories" id="liste-ordre"></div>
+  </section>
+
+  <!-- ========== ÉCRAN TOUR DE GARDE / TIOR (même présentation que Cours) ========== -->
+  <section id="tior" class="ecran">
+    <div class="barre-haut">
+      <button class="btn-verre" id="btn-retour-tior" aria-label="Retour">←</button>
+      <div class="titre-page titre-modules">TOUR DE GARDE</div>
+      <span class="espace-titre"></span>
+    </div>
+    <div class="liseret liseret-page"></div>
+    <div class="liste-categories" id="liste-tior"></div>
+  </section>
+
+  <!-- ========== ÉCRAN ARBRE DE GALONS ========== -->
+  <section id="galons" class="ecran">
+    <div class="barre-haut">
+      <button class="btn-verre" id="btn-retour-galons" aria-label="Retour">←</button>
+      <div class="titre-page titre-modules">ARBRE DE GALONS</div>
+      <span class="espace-titre"></span>
+    </div>
+    <div class="liseret liseret-page"></div>
+    <div class="plan-zone" id="plan-zone">
+      <!-- Plan zoomable : le schéma dessiné (interactif) ou l'image d'origine -->
+      <div class="plan-contenu" id="plan-interactif"></div>
+      <img class="plan-contenu" id="plan-image" src="assets/schema_galons.jpg" alt="Schéma des galons" hidden draggable="false">
+    </div>
+    <div class="gal-actions">
+      <button class="btn-verre large" id="gal-recentrer">RECENTRER</button>
+      <button class="btn-verre large" id="gal-mode">IMAGE</button>
+    </div>
+  </section>
+
+  <!-- Fenêtre d'un chapitre : glisse depuis le bas par-dessus la liste des modules -->
+  <div id="feuille-chapitre" class="feuille">
+    <div class="feuille-panneau verre">
+      <div class="feuille-module" id="feuille-module"></div>
+      <div class="feuille-titre" id="feuille-titre"></div>
+      <div class="feuille-texte" id="feuille-texte"></div>
+      <button class="btn-verre large" id="feuille-fermer" aria-label="Retour">←</button>
+    </div>
+  </div>
+
+  <!-- ========== PAGE CONTRIBUER (plein écran, fondu) ========== -->
+  <div id="page-contribuer" class="plein">
+    <div class="plein-col" id="contribuer-col"></div>
+  </div>
+
+  <!-- ========== PAGE À PROPOS (plein écran, fondu) : posée après Contribuer pour passer par-dessus ========== -->
+  <div id="page-apropos" class="plein">
+    <div class="plein-col" id="apropos-col"></div>
+  </div>
+
+  <!-- ========== MENU DE LA TÊTE : Profil / Réglages ========== -->
+  <div id="menu-tete" class="menu-tete">
+  <!-- Voile plein écran ; toucher en dehors des deux boutons le ferme -->
+    <div class="menu-boutons">
+      <button class="menu-rect verre" id="menu-profil">
+        <img src="icones/avatar.png" alt="" class="menu-icone rond" id="menu-avatar">
+        <span data-t="profil">Profil</span>
+      </button>
+      <button class="menu-rect verre" id="menu-reglages">
+        <img src="icones/reglages.png" alt="" class="menu-icone">
+        <span data-t="reglages">Réglages</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ========== ÉCRAN 5 : PROFIL ========== -->
+  <section id="profil" class="ecran">
+    <div class="barre-haut">
+      <button class="btn-verre" id="btn-retour-profil" aria-label="Retour">←</button>
+      <div class="titre-page" data-t="profil">Profil</div>
+      <span class="espace-titre"></span>
+    </div>
+    <div class="page-contenu profil-zone" id="profil-contenu"></div>
+    <input type="file" id="fichier-photo" accept="image/*" hidden>
+  </section>
+
+  <!-- ========== ÉCRAN 6 : RÉGLAGES ========== -->
+  <section id="reglages" class="ecran">
+    <div class="barre-haut">
+      <button class="btn-verre" id="btn-retour-reglages" aria-label="Retour">←</button>
+      <div class="titre-page" data-t="reglages_titre">RÉGLAGES</div>
+      <span class="espace-titre"></span>
+    </div>
+    <div class="page-contenu reglages-zone verre" id="reglages-liste"></div>
+  </section>
+
+  <!-- Fenêtre modale générique (modifier une valeur, confirmer, aide, à propos) -->
+  <div id="modale" class="modale"><div class="modale-boite verre" id="modale-boite"></div></div>
+
+  <div id="toast" class="toast"></div>
+  <!-- Petit message temporaire (ex : "Bientôt disponible") -->
+
+  <script src="app.js"></script>
+  <!-- Charge le programme JavaScript (la logique de l'app) -->
+</body>
+<!-- Fin du contenu visible -->
+</html>
+<!-- Fin de la page -->
